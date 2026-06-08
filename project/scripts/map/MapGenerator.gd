@@ -1,91 +1,88 @@
 class_name MapGenerator
 extends RefCounted
 
-# Generates a StS-style map: paths from row 0 to boss row,
-# with guaranteed rest sites and elites placed by probability.
-
-const TYPE_WEIGHTS := {
-	MapData.NodeType.COMBAT: 45,
-	MapData.NodeType.ELITE: 8,
-	MapData.NodeType.REST: 12,
-	MapData.NodeType.SHOP: 5,
-	MapData.NodeType.EVENT: 22,
-}
-
-# Rows that are always a specific type (0-indexed)
-const FORCED_TYPES := {
-	8: MapData.NodeType.REST,    # midpoint rest
+const TYPE_WEIGHTS: Dictionary = {
+	MapData.NodeType.COMBAT: 50,
+	MapData.NodeType.ELITE:  10,
+	MapData.NodeType.REST:   12,
+	MapData.NodeType.SHOP:    8,
+	MapData.NodeType.EVENT:  20,
 }
 
 func generate() -> MapData:
 	var data := MapData.new()
 	data.nodes = []
 	var id_counter := 0
+	var grid: Array = []  # grid[row] -> Array of MapNode
 
-	# Generate nodes row by row
-	var grid: Array = []  # grid[row] = Array of MapNode
-	for row in MapData.ROWS:
+	# Build nodes row by row using the width profile
+	for row in MapData.WIDTH_PROFILE.size():
+		var width: int = MapData.WIDTH_PROFILE[row]
 		var row_nodes: Array = []
-		var cols_used := _pick_cols_for_row(row)
-		for col in cols_used:
-			var type := _pick_type(row)
-			var node := MapData.MapNode.new(id_counter, type, row, col)
+		for slot in width:
+			var type := _pick_type(row, slot, width)
+			var node := MapData.MapNode.new(id_counter, type, row, slot)
 			id_counter += 1
 			row_nodes.append(node)
 			data.nodes.append(node)
 		grid.append(row_nodes)
 
-	# Boss node
-	var boss := MapData.MapNode.new(id_counter, MapData.NodeType.BOSS, MapData.BOSS_ROW, 3)
+	# Boss — single node at the end
+	var boss_row: int = MapData.WIDTH_PROFILE.size()
+	var boss := MapData.MapNode.new(id_counter, MapData.NodeType.BOSS, boss_row, 0)
 	data.nodes.append(boss)
 	grid.append([boss])
 
-	# Connect rows
-	for row in MapData.ROWS:
-		var current_row: Array = grid[row]
-		var next_row: Array = grid[row + 1]
-		for node in current_row:
-			# Connect to 1-2 nodes in next row, biased toward same column
-			var targets := _pick_connections(node, next_row)
-			for t in targets:
-				if t.id not in node.connections:
-					node.connections.append(t.id)
+	# Wire connections: each row -> next row, no crossings
+	for row in MapData.WIDTH_PROFILE.size():
+		_connect_rows(grid[row], grid[row + 1])
 
-	data.current_node_id = grid[0][0].id
+	data.current_node_id = -1  # -1 means "not started yet"
 	return data
 
-func _pick_cols_for_row(row: int) -> Array[int]:
-	var rng := RandomNumberGenerator.new()
-	var count := rng.randi_range(3, 6)
-	var cols: Array[int] = []
-	while cols.size() < count:
-		var c := rng.randi_range(0, MapData.COLS - 1)
-		if c not in cols:
-			cols.append(c)
-	cols.sort()
-	return cols
+# Maps each node in cur_row to 1-2 nodes in nxt_row using proportional
+# slot mapping so paths never cross and the tree stays clean.
+func _connect_rows(cur_row: Array, nxt_row: Array) -> void:
+	var cw: int = cur_row.size()
+	var nw: int = nxt_row.size()
 
-func _pick_type(row: int) -> MapData.NodeType:
-	if row in FORCED_TYPES:
-		return FORCED_TYPES[row]
+	for i in cw:
+		var node: MapData.MapNode = cur_row[i]
+
+		# Proportionally map slot i -> target slot in next row
+		var t: int
+		if cw == 1:
+			t = 0
+		else:
+			t = int(round(float(i) * float(nw - 1) / float(cw - 1)))
+
+		_add_connection(node, nxt_row[t])
+
+		# When the row is expanding, also connect to an adjacent slot
+		# so each node branches into two paths
+		if nw > cw:
+			var t2: int = t + 1 if i < cw / 2 else t - 1
+			if t2 >= 0 and t2 < nw and t2 != t:
+				_add_connection(node, nxt_row[t2])
+
+func _add_connection(from_node: MapData.MapNode, to_node: MapData.MapNode) -> void:
+	if to_node.id not in from_node.connections:
+		from_node.connections.append(to_node.id)
+
+func _pick_type(row: int, _slot: int, _width: int) -> MapData.NodeType:
+	if row in MapData.FORCED_TYPES:
+		return MapData.FORCED_TYPES[row]
+	return _weighted_random()
+
+func _weighted_random() -> MapData.NodeType:
 	var rng := RandomNumberGenerator.new()
 	var total := 0
-	for w in TYPE_WEIGHTS.values():
+	for w: int in TYPE_WEIGHTS.values():
 		total += w
-	var roll := rng.randi_range(0, total - 1)
+	var roll: int = rng.randi_range(0, total - 1)
 	var cumulative := 0
-	for type in TYPE_WEIGHTS:
+	for type: MapData.NodeType in TYPE_WEIGHTS:
 		cumulative += TYPE_WEIGHTS[type]
 		if roll < cumulative:
 			return type
 	return MapData.NodeType.COMBAT
-
-func _pick_connections(node: MapData.MapNode, next_row: Array) -> Array:
-	if next_row.is_empty():
-		return []
-	var rng := RandomNumberGenerator.new()
-	# Find the closest node in next row by column
-	var sorted := next_row.duplicate()
-	sorted.sort_custom(func(a, b): return abs(a.col - node.col) < abs(b.col - node.col))
-	var count: int = mini(rng.randi_range(1, 2), sorted.size())
-	return sorted.slice(0, count)
