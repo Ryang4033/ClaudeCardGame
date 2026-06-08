@@ -16,6 +16,12 @@ func _setup() -> void:
 	var enemy_data := _make_cultist()
 	enemy_node.setup(enemy_data)
 
+	# Enemy visual — centred in the upper half of the screen
+	var enemy_view := EnemyView.new()
+	get_tree().current_scene.add_child(enemy_view)
+	enemy_view.position = Vector2(560, 80)
+	enemy_view.bind(enemy_node)
+
 	hud.connect_player(player)
 	hud.connect_enemy(enemy_node)
 	hud.connect_deck_manager(combat_manager.deck_manager)
