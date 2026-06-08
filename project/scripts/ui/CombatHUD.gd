@@ -3,7 +3,6 @@ extends Control
 
 signal end_turn_pressed
 
-# Labels created in _ready — no @onready path dependency on scene structure.
 var player_health_label: Label
 var player_block_label: Label
 var energy_label: Label
@@ -11,34 +10,28 @@ var draw_pile_label: Label
 var discard_pile_label: Label
 var end_turn_button: Button
 var status_label: Label
-var enemy_health_label: Label
-var enemy_block_label: Label
-var enemy_intent_label: Label
-var enemy_name_label: Label
+var _player_status_display: StatusEffectDisplay
 
 func _ready() -> void:
 	_build_ui()
 
 func _build_ui() -> void:
-	# Enemy panel — top left
-	var enemy_panel := _vbox(Vector2(20, 20), Vector2(220, 130))
-	enemy_name_label   = _label(enemy_panel, "Enemy")
-	enemy_health_label = _label(enemy_panel, "HP: —")
-	enemy_block_label  = _label(enemy_panel, "Block: 0")
-	enemy_intent_label = _label(enemy_panel, "Intent: ?")
-
 	# Player panel — bottom left
-	var player_panel := _vbox(Vector2(20, 560), Vector2(220, 140))
+	var player_panel := _vbox(Vector2(20, 490), Vector2(230, 210))
 	player_health_label = _label(player_panel, "HP: —")
 	player_block_label  = _label(player_panel, "Block: 0")
 	energy_label        = _label(player_panel, "Energy: —")
+
+	_player_status_display = StatusEffectDisplay.new()
+	_player_status_display.add_theme_constant_override("separation", 4)
+	player_panel.add_child(_player_status_display)
 
 	# Pile counts — bottom right
 	var pile_row := _hbox(Vector2(1040, 630), Vector2(220, 30))
 	draw_pile_label    = _label(pile_row, "Draw: 0")
 	discard_pile_label = _label(pile_row, "Disc: 0")
 
-	# End turn button — bottom right above piles
+	# End turn button — bottom right
 	end_turn_button = Button.new()
 	end_turn_button.text = "End Turn"
 	end_turn_button.position = Vector2(1060, 580)
@@ -46,14 +39,14 @@ func _build_ui() -> void:
 	end_turn_button.pressed.connect(func(): end_turn_pressed.emit())
 	add_child(end_turn_button)
 
-	# Status label — top centre
+	# Turn status message — top centre
 	status_label = Label.new()
 	status_label.position = Vector2(490, 12)
 	status_label.custom_minimum_size = Vector2(300, 28)
 	status_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	add_child(status_label)
 
-# ── helpers ──────────────────────────────────────────────────────────────────
+# ── helpers ───────────────────────────────────────────────────────────────────
 
 func _vbox(pos: Vector2, size: Vector2) -> VBoxContainer:
 	var c := VBoxContainer.new()
@@ -83,13 +76,10 @@ func connect_player(player: Player) -> void:
 	player.energy_changed.connect(_on_energy_changed)
 	_on_player_health_changed(player.current_health, player.max_health)
 	_on_energy_changed(player.current_energy, player.max_energy)
+	_player_status_display.bind(player)
 
-func connect_enemy(enemy: Enemy) -> void:
-	enemy.health_changed.connect(_on_enemy_health_changed)
-	enemy.block_changed.connect(_on_enemy_block_changed)
-	enemy.intent_changed.connect(_on_enemy_intent_changed)
-	enemy_name_label.text = enemy.entity_name
-	_on_enemy_health_changed(enemy.current_health, enemy.max_health)
+func connect_enemy(_enemy: Enemy) -> void:
+	pass  # Enemy display is handled entirely by EnemyView
 
 func connect_deck_manager(dm: DeckManager) -> void:
 	dm.draw_pile_changed.connect(func(c: int): draw_pile_label.text = "Draw: %d" % c)
@@ -114,23 +104,3 @@ func _on_player_block_changed(amount: int) -> void:
 func _on_energy_changed(current: int, maximum: int) -> void:
 	if energy_label:
 		energy_label.text = "Energy: %d / %d" % [current, maximum]
-
-func _on_enemy_health_changed(current: int, maximum: int) -> void:
-	if enemy_health_label:
-		enemy_health_label.text = "HP: %d / %d" % [current, maximum]
-
-func _on_enemy_block_changed(amount: int) -> void:
-	if enemy_block_label:
-		enemy_block_label.text = "Block: %d" % amount
-
-func _on_enemy_intent_changed(action: Dictionary) -> void:
-	if not enemy_intent_label:
-		return
-	var intent_text: String
-	match action.get("effect", ""):
-		"damage":           intent_text = "Attack %d" % action.get("value", 0)
-		"block":            intent_text = "Defend %d" % action.get("value", 0)
-		"buff_strength":    intent_text = "Buff Strength"
-		"apply_vulnerable": intent_text = "Vulnerable"
-		_:                  intent_text = "Unknown"
-	enemy_intent_label.text = "Intent: " + intent_text
