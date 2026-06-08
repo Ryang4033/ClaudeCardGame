@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/enemies/EnemyData.gd" id="1_enemydata"]
+
+[resource]
+script = ExtResource("1_enemydata")
+enemy_name = "The Guardian (Boss)"
+max_health = 250
+action_pattern = [
+	{"effect": "block", "value": 30},
+	{"effect": "damage", "value": 18},
+	{"effect": "damage", "value": 18},
+	{"effect": "buff_strength", "value": 2},
+	{"effect": "damage", "value": 32},
+]

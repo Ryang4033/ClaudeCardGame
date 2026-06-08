@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/enemies/EnemyData.gd" id="1_enemydata"]
+
+[resource]
+script = ExtResource("1_enemydata")
+enemy_name = "Jaw Worm"
+max_health = 42
+action_pattern = [
+	{"effect": "damage", "value": 11},
+	{"effect": "block", "value": 9},
+	{"effect": "damage", "value": 7},
+	{"effect": "block", "value": 6},
+]
