@@ -87,5 +87,5 @@ func _pick_connections(node: MapData.MapNode, next_row: Array) -> Array:
 	# Find the closest node in next row by column
 	var sorted := next_row.duplicate()
 	sorted.sort_custom(func(a, b): return abs(a.col - node.col) < abs(b.col - node.col))
-	var count := min(rng.randi_range(1, 2), sorted.size())
+	var count: int = mini(rng.randi_range(1, 2), sorted.size())
 	return sorted.slice(0, count)
