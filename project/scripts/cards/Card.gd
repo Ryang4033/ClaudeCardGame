@@ -29,6 +29,7 @@ const TYPE_COLORS := {
 
 func _ready() -> void:
 	custom_minimum_size = Vector2(CARD_W, CARD_H)
+	size = Vector2(CARD_W, CARD_H)
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	_build_ui()
 	mouse_entered.connect(_on_mouse_entered)

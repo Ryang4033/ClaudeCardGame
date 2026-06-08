@@ -15,6 +15,7 @@ func add_card(data: CardData) -> void:
 		return
 	var card: Card = card_scene.instantiate()
 	add_child(card)
+	card.size = Vector2(Card.CARD_W, Card.CARD_H)
 	card.setup(data)
 	card.card_clicked.connect(_on_card_clicked)
 	cards.append(card)
