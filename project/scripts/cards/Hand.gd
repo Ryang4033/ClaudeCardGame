@@ -37,7 +37,7 @@ func _arrange_cards() -> void:
 
 	var total_width := card_spacing * (count - 1)
 	var start_x := -total_width / 2.0
-	var angle_step := fan_spread_degrees / max(count - 1, 1)
+	var angle_step := fan_spread_degrees / maxf(count - 1, 1)
 	var start_angle := -fan_spread_degrees / 2.0
 
 	for i in count:
