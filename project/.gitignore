@@ -1,0 +1,10 @@
+# Godot 4 generated files
+.godot/
+*.translation
+
+# Export templates
+export_presets.cfg
+
+# OS generated
+.DS_Store
+Thumbs.db
