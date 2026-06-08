@@ -56,6 +56,10 @@ func _apply(effect: Dictionary, source: CombatEntity, target: CombatEntity) -> v
 		"apply_poison":
 			target.apply_status("poison", value)
 
+		"damage_equal_to_block":
+			var dmg := _calc_damage(source.block, source, target)
+			target.take_damage(dmg)
+
 		_:
 			push_warning("EffectResolver: unknown effect '%s'" % name)
 

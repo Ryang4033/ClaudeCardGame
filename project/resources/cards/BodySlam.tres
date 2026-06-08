@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="CardData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/cards/CardData.gd" id="1_carddata"]
+
+[resource]
+script = ExtResource("1_carddata")
+card_name = "Body Slam"
+description = "Deal damage equal to your current Block."
+cost = 1
+type = 0
+rarity = 1
+effects = [{"effect": "damage_equal_to_block", "value": 0}]

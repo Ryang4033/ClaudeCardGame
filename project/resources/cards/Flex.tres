@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="CardData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/cards/CardData.gd" id="1_carddata"]
+
+[resource]
+script = ExtResource("1_carddata")
+card_name = "Flex"
+description = "Gain 2 Strength. At the end of your turn, lose 2 Strength."
+cost = 0
+type = 1
+rarity = 1
+effects = [{"effect": "gain_strength", "value": 2}]
