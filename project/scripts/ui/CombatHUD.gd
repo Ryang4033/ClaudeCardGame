@@ -104,26 +104,33 @@ func set_interactable(enabled: bool) -> void:
 # ── signal handlers ───────────────────────────────────────────────────────────
 
 func _on_player_health_changed(current: int, maximum: int) -> void:
-	player_health_label.text = "HP: %d / %d" % [current, maximum]
+	if player_health_label:
+		player_health_label.text = "HP: %d / %d" % [current, maximum]
 
 func _on_player_block_changed(amount: int) -> void:
-	player_block_label.text = "Block: %d" % amount
+	if player_block_label:
+		player_block_label.text = "Block: %d" % amount
 
 func _on_energy_changed(current: int, maximum: int) -> void:
-	energy_label.text = "Energy: %d / %d" % [current, maximum]
+	if energy_label:
+		energy_label.text = "Energy: %d / %d" % [current, maximum]
 
 func _on_enemy_health_changed(current: int, maximum: int) -> void:
-	enemy_health_label.text = "HP: %d / %d" % [current, maximum]
+	if enemy_health_label:
+		enemy_health_label.text = "HP: %d / %d" % [current, maximum]
 
 func _on_enemy_block_changed(amount: int) -> void:
-	enemy_block_label.text = "Block: %d" % amount
+	if enemy_block_label:
+		enemy_block_label.text = "Block: %d" % amount
 
 func _on_enemy_intent_changed(action: Dictionary) -> void:
+	if not enemy_intent_label:
+		return
 	var intent_text: String
 	match action.get("effect", ""):
-		"damage":        intent_text = "Attack %d"  % action.get("value", 0)
-		"block":         intent_text = "Defend %d"  % action.get("value", 0)
-		"buff_strength": intent_text = "Buff Strength"
+		"damage":           intent_text = "Attack %d" % action.get("value", 0)
+		"block":            intent_text = "Defend %d" % action.get("value", 0)
+		"buff_strength":    intent_text = "Buff Strength"
 		"apply_vulnerable": intent_text = "Vulnerable"
-		_:               intent_text = "Unknown"
+		_:                  intent_text = "Unknown"
 	enemy_intent_label.text = "Intent: " + intent_text

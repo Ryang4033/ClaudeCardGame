@@ -7,6 +7,12 @@ extends Node
 @onready var hud: CombatHUD = $HUD
 
 func _ready() -> void:
+	# Defer one frame so every node's _ready() has finished before we wire
+	# signals and call methods that depend on child state (e.g. HUD labels).
+	await get_tree().process_frame
+	_setup()
+
+func _setup() -> void:
 	var enemy_data := _make_cultist()
 	enemy_node.setup(enemy_data)
 
@@ -24,18 +30,16 @@ func _ready() -> void:
 	combat_manager.setup(player, [enemy_node], hand, deck)
 
 func _on_state_changed(state: CombatManager.State) -> void:
-	var is_player_turn := state == CombatManager.State.PLAYER_TURN
-	hud.set_interactable(is_player_turn)
+	hud.set_interactable(state == CombatManager.State.PLAYER_TURN)
 
 func _on_card_resolved(_data: CardData) -> void:
-	pass  # Hook for future animations or log
+	pass
 
 func _build_starter_deck() -> Array[CardData]:
 	var deck: Array[CardData] = []
-	# 5x Strike, 4x Defend, 1x Bash
-	for i in 5:
+	for _i in 5:
 		deck.append(load("res://resources/cards/Strike.tres"))
-	for i in 4:
+	for _i in 4:
 		deck.append(load("res://resources/cards/Defend.tres"))
 	deck.append(load("res://resources/cards/Bash.tres"))
 	return deck
