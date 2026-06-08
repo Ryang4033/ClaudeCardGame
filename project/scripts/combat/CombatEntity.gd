@@ -52,6 +52,11 @@ func tick_statuses() -> void:
 	var to_remove: Array[String] = []
 	for status in statuses:
 		match status:
+			"poison":
+				take_damage(statuses[status])
+				statuses[status] -= 1
+				if statuses[status] <= 0:
+					to_remove.append(status)
 			"vulnerable", "weak", "frail":
 				statuses[status] -= 1
 				if statuses[status] <= 0:
