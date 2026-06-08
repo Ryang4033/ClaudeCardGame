@@ -34,8 +34,7 @@ func _setup() -> void:
 	combat_manager.combat_ended.connect(_on_combat_ended)
 	hand.card_played.connect(combat_manager.play_card)
 
-	var deck := _build_starter_deck()
-	combat_manager.setup(player, [enemy_node], hand, deck)
+	combat_manager.setup(player, [enemy_node], hand, RunState.deck)
 
 func _on_state_changed(state: CombatManager.State) -> void:
 	hud.set_interactable(state == CombatManager.State.PLAYER_TURN)
@@ -68,15 +67,6 @@ func _on_reward_skipped() -> void:
 func _go_to_map() -> void:
 	RunState.save_player_health(player.current_health, player.max_health)
 	get_tree().change_scene_to_file("res://scenes/map/Map.tscn")
-
-func _build_starter_deck() -> Array[CardData]:
-	var deck: Array[CardData] = []
-	for _i in 5:
-		deck.append(load("res://resources/cards/Strike.tres"))
-	for _i in 4:
-		deck.append(load("res://resources/cards/Defend.tres"))
-	deck.append(load("res://resources/cards/Bash.tres"))
-	return deck
 
 func _make_cultist() -> EnemyData:
 	var data := EnemyData.new()
