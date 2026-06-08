@@ -6,7 +6,9 @@ extends Node
 var map_data: MapData
 
 func _ready() -> void:
-	map_data = MapGenerator.new().generate()
+	if RunState.map_data == null:
+		RunState.map_data = MapGenerator.new().generate()
+	map_data = RunState.map_data
 	map_ui.draw_map(map_data)
 	act_label.text = "Act %d" % map_data.act
 	map_ui.node_selected.connect(_on_node_selected)

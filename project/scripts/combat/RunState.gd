@@ -17,7 +17,7 @@ func start_new_run() -> void:
 	floor_number = 0
 	act = 1
 	relics.clear()
-	map_data = null
+	map_data = null  # cleared so MapController generates a fresh map
 	deck = _build_starter_deck()
 
 func save_player_health(current: int, maximum: int) -> void:
