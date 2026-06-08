@@ -67,13 +67,13 @@ func _calc_damage(base: int, source: CombatEntity, target: CombatEntity) -> int:
 	var dmg := base + source.get_strength()
 	if source.get_status("weak") > 0:
 		dmg = int(dmg * 0.75)
-	return max(0, dmg)
+	return maxi(0, dmg)
 
 func _calc_block(base: int, source: CombatEntity) -> int:
 	var blk := base + source.get_status("dexterity")
 	if source.get_status("frail") > 0:
 		blk = int(blk * 0.75)
-	return max(0, blk)
+	return maxi(0, blk)
 
 signal draw_requested(count: int)
 signal energy_requested(amount: int)

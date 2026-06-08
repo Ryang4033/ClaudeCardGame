@@ -17,24 +17,26 @@ func _ready() -> void:
 	current_health = max_health
 
 func take_damage(amount: int) -> int:
-	var damage := _apply_vulnerable(amount)
-	damage = max(0, damage - block)
-	block = max(0, block - amount)
+	var incoming: int = _apply_vulnerable(amount)  # after vulnerable multiplier
+	var absorbed: int = mini(block, incoming)       # block absorbs up to full hit
+	var final_dmg: int = incoming - absorbed        # what actually hits HP
+
+	block = block - absorbed
 	block_changed.emit(block)
 
-	current_health = max(0, current_health - damage)
+	current_health = maxi(0, current_health - final_dmg)
 	health_changed.emit(current_health, max_health)
 
 	if current_health <= 0:
 		died.emit()
-	return damage
+	return final_dmg
 
 func heal(amount: int) -> void:
-	current_health = min(max_health, current_health + amount)
+	current_health = mini(max_health, current_health + amount)
 	health_changed.emit(current_health, max_health)
 
 func gain_block(amount: int) -> void:
-	block += amount
+	block = block + amount
 	block_changed.emit(block)
 
 func reset_block() -> void:
