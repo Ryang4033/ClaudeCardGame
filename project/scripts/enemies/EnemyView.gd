@@ -68,7 +68,10 @@ func _build_ui() -> void:
 	_intent_label.add_theme_font_size_override("font_size", 11)
 	vbox.add_child(_intent_label)
 
+var _enemy: Enemy
+
 func bind(enemy: Enemy) -> void:
+	_enemy = enemy
 	_max_hp = enemy.max_health
 	_name_label.text = enemy.entity_name
 	_update_hp(enemy.current_health, enemy.max_health)
@@ -77,6 +80,7 @@ func bind(enemy: Enemy) -> void:
 	enemy.health_changed.connect(_update_hp)
 	enemy.block_changed.connect(_update_block)
 	enemy.intent_changed.connect(_update_intent)
+	enemy.status_applied.connect(_on_status_applied)
 
 func _update_hp(current: int, maximum: int) -> void:
 	_max_hp = maximum
@@ -89,9 +93,21 @@ func _update_block(amount: int) -> void:
 func _update_intent(action: Dictionary) -> void:
 	var text: String
 	match action.get("effect", ""):
-		"damage":           text = "Attack %d" % action.get("value", 0)
-		"block":            text = "Defend %d" % action.get("value", 0)
-		"buff_strength":    text = "Buff Strength"
-		"apply_vulnerable": text = "Vulnerable"
-		_:                  text = "?"
+		"damage":
+			var base: int = action.get("value", 0)
+			var total: int = base + (_enemy.get_strength() if _enemy else 0)
+			text = "Attack %d" % total
+		"block":
+			text = "Defend %d" % action.get("value", 0)
+		"buff_strength":
+			text = "Buff Strength +%d" % action.get("value", 0)
+		"apply_vulnerable":
+			text = "Vulnerable %d" % action.get("value", 0)
+		_:
+			text = "?"
 	_intent_label.text = "Intent: " + text
+
+func _on_status_applied(_status_name: String, _stacks: int) -> void:
+	# Refresh intent label so strength changes are reflected immediately
+	if _enemy:
+		_update_intent(_enemy.next_action)
