@@ -1,0 +1,108 @@
+[gd_scene load_steps=9 format=3]
+
+[ext_resource type="Script" path="res://scripts/combat/CombatManager.gd" id="1_combat"]
+[ext_resource type="Script" path="res://scripts/combat/EffectResolver.gd" id="2_resolver"]
+[ext_resource type="Script" path="res://scripts/cards/DeckManager.gd" id="3_deck"]
+[ext_resource type="Script" path="res://scripts/combat/Player.gd" id="4_player"]
+[ext_resource type="Script" path="res://scripts/enemies/Enemy.gd" id="5_enemy"]
+[ext_resource type="PackedScene" path="res://scenes/combat/Hand.tscn" id="6_hand"]
+[ext_resource type="Script" path="res://scripts/ui/CombatHUD.gd" id="7_hud"]
+[ext_resource type="Script" path="res://scripts/combat/CombatSetup.gd" id="8_setup"]
+
+[node name="Combat" type="Node"]
+script = ExtResource("8_setup")
+
+[node name="Background" type="ColorRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.12, 0.10, 0.15, 1.0)
+
+[node name="CombatManager" type="Node" parent="."]
+script = ExtResource("1_combat")
+
+[node name="EffectResolver" type="Node" parent="CombatManager"]
+script = ExtResource("2_resolver")
+
+[node name="DeckManager" type="Node" parent="CombatManager"]
+script = ExtResource("3_deck")
+
+[node name="Player" type="Node" parent="."]
+script = ExtResource("4_player")
+
+[node name="Enemy" type="Node" parent="."]
+script = ExtResource("5_enemy")
+
+[node name="Hand" parent="." instance=ExtResource("6_hand")]
+anchor_left = 0.5
+anchor_right = 0.5
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_top = -220.0
+offset_bottom = -40.0
+
+[node name="HUD" type="Control" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("7_hud")
+
+[node name="EnemyArea" type="VBoxContainer" parent="HUD"]
+offset_left = 20.0
+offset_top = 20.0
+offset_right = 200.0
+offset_bottom = 120.0
+
+[node name="EnemyName" type="Label" parent="HUD/EnemyArea"]
+text = "Enemy"
+
+[node name="EnemyHealth" type="Label" parent="HUD/EnemyArea"]
+text = "HP: 0/0"
+
+[node name="EnemyBlock" type="Label" parent="HUD/EnemyArea"]
+text = "Block: 0"
+
+[node name="EnemyIntent" type="Label" parent="HUD/EnemyArea"]
+text = "Intent: ?"
+
+[node name="PlayerArea" type="VBoxContainer" parent="HUD"]
+offset_left = 20.0
+offset_top = 580.0
+offset_right = 200.0
+offset_bottom = 680.0
+
+[node name="PlayerHealth" type="Label" parent="HUD/PlayerArea"]
+text = "HP: 0/0"
+
+[node name="PlayerBlock" type="Label" parent="HUD/PlayerArea"]
+text = "Block: 0"
+
+[node name="Energy" type="Label" parent="HUD/PlayerArea"]
+text = "Energy: 3/3"
+
+[node name="PileCounts" type="HBoxContainer" parent="HUD"]
+offset_left = 1080.0
+offset_top = 620.0
+offset_right = 1260.0
+offset_bottom = 645.0
+
+[node name="DrawPile" type="Label" parent="HUD/PileCounts"]
+text = "Draw: 0"
+
+[node name="DiscardPile" type="Label" parent="HUD/PileCounts"]
+text = "Disc: 0"
+
+[node name="EndTurnButton" type="Button" parent="HUD"]
+offset_left = 1080.0
+offset_top = 560.0
+offset_right = 1260.0
+offset_bottom = 600.0
+text = "End Turn"
+
+[node name="StatusLabel" type="Label" parent="HUD"]
+offset_left = 540.0
+offset_top = 10.0
+offset_right = 740.0
+offset_bottom = 35.0
+text = ""
+horizontal_alignment = 1
